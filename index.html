@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>2 Factor Authentication for IMU App</title>
+  <title>2FA Demo Login (URL-Driven Gait)</title>
   <style>
     body {
       font-family: sans-serif;
@@ -33,11 +33,27 @@
       font-weight: bold;
       text-align: center;
     }
-    #gait-display {
+    /* Gait options styling */
+    #gait-options {
+      display: flex;
+      gap: 1em;
+      align-items: center;
       margin-top: 0.5em;
-      font-style: italic;
-      color: #555;
     }
+    #gait-options span {
+      display: flex;
+      align-items: center;
+      font-size: 0.95em;
+    }
+    #gait-options span .icon {
+      display: inline-block;
+      width: 1em;
+      text-align: center;
+      margin-right: 0.25em;
+      font-weight: bold;
+    }
+    .icon.approve { color: green; }
+    .icon.decline { color: red; }
   </style>
 </head>
 <body>
@@ -62,9 +78,17 @@
       value="password123"
     />
 
-    <label>Gait Authentication Signature (from URL):</label>
-    <div id="gait-display">Loading…</div>
-    <!-- hidden field so we can read it in JS easily -->
+    <label>Gait Authentication Signature:</label>
+    <div id="gait-options">
+      <span id="opt-approve">
+        <span id="approve-icon" class="icon approve"></span>
+        Approve
+      </span>
+      <span id="opt-decline">
+        <span id="decline-icon" class="icon decline"></span>
+        Decline
+      </span>
+    </div>
     <input type="hidden" id="gait" />
 
     <button type="submit">Login</button>
@@ -73,23 +97,37 @@
   <p id="message"></p>
 
   <script>
-    // 1) The single valid credentials
+    // Local “valid” credentials
     const VALID_USERNAME = 'testuser123';
     const VALID_PASSWORD = 'password123';
     const VALID_GAIT_SIGNATURE = 'approve';
 
-    // 2) On load: display welcome text and pull gait from URL
     document.addEventListener('DOMContentLoaded', () => {
+      // Welcome text
       document.getElementById('welcome-text').textContent =
-        'Please enter your username and password. Gait signature is passed via URL.';
+        'Enter your credentials below. Gait signature is passed via the URL parameter.';
+
+      // Read ?gait= parameter
       const params = new URLSearchParams(window.location.search);
       const gaitParam = (params.get('gait') || '').trim().toLowerCase();
       document.getElementById('gait').value = gaitParam;
-      document.getElementById('gait-display').textContent =
-        gaitParam ? gaitParam : '(missing—add ?gait=approve or decline)';
+
+      // Update icons
+      const approveIcon = document.getElementById('approve-icon');
+      const declineIcon = document.getElementById('decline-icon');
+
+      if (gaitParam === 'approve') {
+        approveIcon.textContent = '✓';
+        declineIcon.textContent = '✗';
+      } else if (gaitParam === 'decline') {
+        approveIcon.textContent = '✗';
+        declineIcon.textContent = '✓';
+      } else {
+        approveIcon.textContent = '';
+        declineIcon.textContent = '';
+      }
     });
 
-    // 3) Handle the form submit
     document.getElementById('login-form').addEventListener('submit', e => {
       e.preventDefault();
       const msgEl = document.getElementById('message');
@@ -99,7 +137,6 @@
       const password = document.getElementById('password').value;
       const gait     = document.getElementById('gait').value;
 
-      // 4) Local check
       if (
         username === VALID_USERNAME &&
         password === VALID_PASSWORD &&
