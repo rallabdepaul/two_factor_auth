@@ -33,31 +33,23 @@
       font-weight: bold;
       text-align: center;
     }
-    /* Gait options styling */
-    #gait-options {
-      display: flex;
-      gap: 1em;
-      align-items: center;
-      margin-top: 0.5em;
-    }
-    #gait-options span {
+    /* Gait line styling */
+    #gait-line {
+      margin-top: 1em;
+      font-size: 1em;
+      font-weight: bold;
       display: flex;
       align-items: center;
-      font-size: 0.95em;
+      gap: 0.5em;
     }
-    #approve-icon, #decline-icon {
+    #gait-icon {
       font-size: 1.2em;
-      width: 1.2em;
-      display: inline-block;
-      text-align: center;
-      margin-right: 0.25em;
     }
   </style>
 </head>
 <body>
 
   <h1>Two-Factor Login</h1>
-  <p id="welcome-text"></p>
 
   <form id="login-form">
     <label for="username">Username:</label>
@@ -66,14 +58,10 @@
     <label for="password">Password:</label>
     <input type="password" id="password" required value="password123" />
 
-    <label>Gait Authentication Signature:</label>
-    <div id="gait-options">
-      <span>
-        <span id="approve-icon"></span> Approve
-      </span>
-      <span>
-        <span id="decline-icon"></span> Decline
-      </span>
+    <div id="gait-line">
+      Gait Authentication Signature:
+      <span id="gait-icon"></span>
+      <span id="gait-text"></span>
     </div>
     <input type="hidden" id="gait" />
 
@@ -89,28 +77,24 @@
     const VALID_GAIT_SIGNATURE = 'approve';
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Welcome text
-      document.getElementById('welcome-text').textContent =
-        'Enter your credentials below. Gait signature is passed via ?gait= URL parameter.';
-
       // Read gait from URL
       const params = new URLSearchParams(window.location.search);
       const gaitParam = (params.get('gait') || '').trim().toLowerCase();
       document.getElementById('gait').value = gaitParam;
 
-      // Set icons
-      const approveIcon = document.getElementById('approve-icon');
-      const declineIcon = document.getElementById('decline-icon');
+      // Update gait line
+      const iconEl = document.getElementById('gait-icon');
+      const textEl = document.getElementById('gait-text');
 
       if (gaitParam === 'approve') {
-        approveIcon.textContent = '✅';
-        declineIcon.textContent = '';
+        iconEl.textContent = '✅';
+        textEl.textContent = 'Approved';
       } else if (gaitParam === 'decline') {
-        approveIcon.textContent = '';
-        declineIcon.textContent = '❌';
+        iconEl.textContent = '❌';
+        textEl.textContent = 'Declined';
       } else {
-        approveIcon.textContent = '';
-        declineIcon.textContent = '';
+        iconEl.textContent = '';
+        textEl.textContent = '(no signature)';
       }
     });
 
