@@ -45,15 +45,13 @@
       align-items: center;
       font-size: 0.95em;
     }
-    #gait-options span .icon {
+    #approve-icon, #decline-icon {
+      font-size: 1.2em;
+      width: 1.2em;
       display: inline-block;
-      width: 1em;
       text-align: center;
       margin-right: 0.25em;
-      font-weight: bold;
     }
-    .icon.approve { color: green; }
-    .icon.decline { color: red; }
   </style>
 </head>
 <body>
@@ -63,30 +61,18 @@
 
   <form id="login-form">
     <label for="username">Username:</label>
-    <input
-      type="text"
-      id="username"
-      required
-      value="testuser123"
-    />
+    <input type="text" id="username" required value="testuser123" />
 
     <label for="password">Password:</label>
-    <input
-      type="password"
-      id="password"
-      required
-      value="password123"
-    />
+    <input type="password" id="password" required value="password123" />
 
     <label>Gait Authentication Signature:</label>
     <div id="gait-options">
-      <span id="opt-approve">
-        <span id="approve-icon" class="icon approve"></span>
-        Approve
+      <span>
+        <span id="approve-icon"></span> Approve
       </span>
-      <span id="opt-decline">
-        <span id="decline-icon" class="icon decline"></span>
-        Decline
+      <span>
+        <span id="decline-icon"></span> Decline
       </span>
     </div>
     <input type="hidden" id="gait" />
@@ -105,23 +91,23 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Welcome text
       document.getElementById('welcome-text').textContent =
-        'Enter your credentials below. Gait signature is passed via the URL parameter.';
+        'Enter your credentials below. Gait signature is passed via ?gait= URL parameter.';
 
-      // Read ?gait= parameter
+      // Read gait from URL
       const params = new URLSearchParams(window.location.search);
       const gaitParam = (params.get('gait') || '').trim().toLowerCase();
       document.getElementById('gait').value = gaitParam;
 
-      // Update icons
+      // Set icons
       const approveIcon = document.getElementById('approve-icon');
       const declineIcon = document.getElementById('decline-icon');
 
       if (gaitParam === 'approve') {
-        approveIcon.textContent = '✓';
-        declineIcon.textContent = '✗';
+        approveIcon.textContent = '✅';
+        declineIcon.textContent = '';
       } else if (gaitParam === 'decline') {
-        approveIcon.textContent = '✗';
-        declineIcon.textContent = '✓';
+        approveIcon.textContent = '';
+        declineIcon.textContent = '❌';
       } else {
         approveIcon.textContent = '';
         declineIcon.textContent = '';
