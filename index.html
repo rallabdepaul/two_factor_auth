@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>2FA Demo Login</title>
+  <title>2 Factor Authentication for IMU App</title>
   <style>
     body {
       font-family: sans-serif;
@@ -33,6 +33,11 @@
       font-weight: bold;
       text-align: center;
     }
+    #gait-display {
+      margin-top: 0.5em;
+      font-style: italic;
+      color: #555;
+    }
   </style>
 </head>
 <body>
@@ -42,10 +47,25 @@
 
   <form id="login-form">
     <label for="username">Username:</label>
-    <input type="text" id="username" required />
+    <input
+      type="text"
+      id="username"
+      required
+      value="testuser123"
+    />
 
     <label for="password">Password:</label>
-    <input type="password" id="password" required />
+    <input
+      type="password"
+      id="password"
+      required
+      value="password123"
+    />
+
+    <label>Gait Authentication Signature (from URL):</label>
+    <div id="gait-display">Loading…</div>
+    <!-- hidden field so we can read it in JS easily -->
+    <input type="hidden" id="gait" />
 
     <button type="submit">Login</button>
   </form>
@@ -53,38 +73,41 @@
   <p id="message"></p>
 
   <script>
-    // 1️⃣ Show welcome text on page load
+    // 1) The single valid credentials
+    const VALID_USERNAME = 'testuser123';
+    const VALID_PASSWORD = 'password123';
+    const VALID_GAIT_SIGNATURE = 'approve';
+
+    // 2) On load: display welcome text and pull gait from URL
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('welcome-text').textContent =
-        'Please enter your username and password to proceed with 2FA.';
+        'Please enter your username and password. Gait signature is passed via URL.';
+      const params = new URLSearchParams(window.location.search);
+      const gaitParam = (params.get('gait') || '').trim().toLowerCase();
+      document.getElementById('gait').value = gaitParam;
+      document.getElementById('gait-display').textContent =
+        gaitParam ? gaitParam : '(missing—add ?gait=approve or decline)';
     });
 
-    // 2️⃣ Handle the form submit
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+    // 3) Handle the form submit
+    document.getElementById('login-form').addEventListener('submit', e => {
       e.preventDefault();
-
       const msgEl = document.getElementById('message');
-      msgEl.textContent = 'Verifying…';
+      msgEl.textContent = 'Checking credentials…';
 
-      const username = document.getElementById('username').value;
+      const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
+      const gait     = document.getElementById('gait').value;
 
-      try {
-        const res = await fetch('/2fa', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-
-        const data = await res.json();
-        if (res.ok && data.success) {
-          msgEl.textContent = '✅ Login successful';
-        } else {
-          msgEl.textContent = '❌ Login failed: ' + (data.message || res.statusText);
-        }
-      } catch (err) {
-        msgEl.textContent = '⚠️ Network error';
-        console.error(err);
+      // 4) Local check
+      if (
+        username === VALID_USERNAME &&
+        password === VALID_PASSWORD &&
+        gait === VALID_GAIT_SIGNATURE
+      ) {
+        msgEl.textContent = '✅ Login successful';
+      } else {
+        msgEl.textContent = '❌ Login declined';
       }
     });
   </script>
