@@ -99,24 +99,31 @@
     });
 
     document.getElementById('login-form').addEventListener('submit', e => {
-      e.preventDefault();
-      const msgEl = document.getElementById('message');
-      msgEl.textContent = 'Checking credentials…';
+    e.preventDefault();
+    const msgEl = document.getElementById('message');
 
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      const gait     = document.getElementById('gait').value;
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const gait     = document.getElementById('gait').value;
 
-      if (
-        username === VALID_USERNAME &&
-        password === VALID_PASSWORD &&
-        gait === VALID_GAIT_SIGNATURE
-      ) {
-        msgEl.textContent = '✅ Login successful';
-      } else {
-        msgEl.textContent = '❌ Login declined';
-      }
-    });
+    const success = (
+      username === VALID_USERNAME &&
+      password === VALID_PASSWORD &&
+      gait === VALID_GAIT_SIGNATURE
+    );
+
+    if (success) {
+      msgEl.textContent = '✅ Login successful';
+    } else {
+      msgEl.textContent = '❌ Login declined';
+    }
+
+    //pass boolean back to Flutter
+    if (window.flutter_inappwebview) {
+      window.flutter_inappwebview.callHandler('onLoginResult', success);
+    }
+  });
+
   </script>
 
 </body>
