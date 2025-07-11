@@ -2,73 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>2 Factor Authentication - IMU App</title>
   <style>
+    /* Reset & responsive box-sizing */
+    *, *::before, *::after { box-sizing: border-box; }
     body {
+      margin: 0;
       font-family: sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+    }
+    main {
+      background: white;
+      width: 100%;
       max-width: 400px;
-      margin: auto;
-      padding: 2em;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     h1 {
       text-align: center;
+      margin-top: 0;
+      font-size: 1.5rem;
     }
     label {
       display: block;
-      margin: 1em 0 0.5em;
+      margin: 1rem 0 0.25rem;
+      font-size: 0.95rem;
     }
     input {
       width: 100%;
-      padding: 0.5em;
-      box-sizing: border-box;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     button {
-      margin-top: 1em;
-      padding: 0.75em;
+      margin-top: 1rem;
+      padding: 0.75rem;
       width: 100%;
-      font-size: 1em;
+      font-size: 1rem;
+      background-color: #007aff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:active {
+      background-color: #005bb5;
     }
     #message {
-      margin-top: 1em;
+      margin-top: 1rem;
       font-weight: bold;
       text-align: center;
+      font-size: 0.95rem;
     }
     /* Gait line styling */
     #gait-line {
-      margin-top: 1em;
-      font-size: 1em;
+      margin-top: 1rem;
       font-weight: bold;
       display: flex;
       align-items: center;
-      gap: 0.5em;
+      gap: 0.5rem;
+      font-size: 1rem;
+      flex-wrap: wrap;
     }
     #gait-icon {
-      font-size: 1.2em;
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+    @media (max-width: 360px) {
+      h1 { font-size: 1.25rem; }
+      button { font-size: 0.95rem; }
     }
   </style>
 </head>
 <body>
+  <main>
+    <h1>Two-Factor Login</h1>
 
-  <h1>Two-Factor Login</h1>
+    <form id="login-form">
+      <label for="username">Username:</label>
+      <input type="text" id="username" required value="testuser123" autocomplete="username" />
 
-  <form id="login-form">
-    <label for="username">Username:</label>
-    <input type="text" id="username" required value="testuser123" />
+      <label for="password">Password:</label>
+      <input type="password" id="password" required value="password123" autocomplete="current-password" />
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" required value="password123" />
+      <div id="gait-line">
+        Gait Authentication Signature:
+        <span id="gait-icon"></span>
+        <span id="gait-text"></span>
+      </div>
+      <input type="hidden" id="gait" />
 
-    <div id="gait-line">
-      Gait Authentication Signature:
-      <span id="gait-icon"></span>
-      <span id="gait-text"></span>
-    </div>
-    <input type="hidden" id="gait" />
+      <button type="submit">Login</button>
+    </form>
 
-    <button type="submit">Login</button>
-  </form>
-
-  <p id="message"></p>
+    <p id="message"></p>
+  </main>
 
   <script>
     // Local “valid” credentials
@@ -99,32 +133,30 @@
     });
 
     document.getElementById('login-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const msgEl = document.getElementById('message');
+      e.preventDefault();
+      const msgEl = document.getElementById('message');
 
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-    const gait     = document.getElementById('gait').value;
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const gait     = document.getElementById('gait').value;
 
-    const success = (
-      username === VALID_USERNAME &&
-      password === VALID_PASSWORD &&
-      gait === VALID_GAIT_SIGNATURE
-    );
+      const success = (
+        username === VALID_USERNAME &&
+        password === VALID_PASSWORD &&
+        gait === VALID_GAIT_SIGNATURE
+      );
 
-    if (success) {
-      msgEl.textContent = '✅ Login successful';
-    } else {
-      msgEl.textContent = '❌ Login declined';
-    }
+      if (success) {
+        msgEl.textContent = '✅ Login successful';
+      } else {
+        msgEl.textContent = '❌ Login declined';
+      }
 
-    //pass boolean back to Flutter
-    if (window.flutter_inappwebview) {
-      window.flutter_inappwebview.callHandler('onLoginResult', success);
-    }
-  });
-
+      // pass boolean back to Flutter
+      if (window.flutter_inappwebview) {
+        window.flutter_inappwebview.callHandler('onLoginResult', success);
+      }
+    });
   </script>
-
 </body>
 </html>
