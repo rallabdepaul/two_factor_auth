@@ -1,7 +1,93 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>2 Factor Authentication - IMU App</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>2FA Demo Login</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 400px;
+      margin: auto;
+      padding: 2em;
+    }
+    h1 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin: 1em 0 0.5em;
+    }
+    input {
+      width: 100%;
+      padding: 0.5em;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 1em;
+      padding: 0.75em;
+      width: 100%;
+      font-size: 1em;
+    }
+    #message {
+      margin-top: 1em;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
 <body>
-  <h1>2FA Demo</h1>
-  <p>Loading…</p>
+
+  <h1>Two-Factor Login</h1>
+  <p id="welcome-text"></p>
+
+  <form id="login-form">
+    <label for="username">Username:</label>
+    <input type="text" id="username" required />
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" required />
+
+    <button type="submit">Login</button>
+  </form>
+
+  <p id="message"></p>
+
+  <script>
+    // 1️⃣ Show welcome text on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('welcome-text').textContent =
+        'Please enter your username and password to proceed with 2FA.';
+    });
+
+    // 2️⃣ Handle the form submit
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const msgEl = document.getElementById('message');
+      msgEl.textContent = 'Verifying…';
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/2fa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          msgEl.textContent = '✅ Login successful';
+        } else {
+          msgEl.textContent = '❌ Login failed: ' + (data.message || res.statusText);
+        }
+      } catch (err) {
+        msgEl.textContent = '⚠️ Network error';
+        console.error(err);
+      }
+    });
+  </script>
+
 </body>
 </html>
